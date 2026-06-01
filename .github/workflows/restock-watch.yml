@@ -1,0 +1,29 @@
+name: Restock Watch
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - run: python check_matcha.py
+
+      - name: Commit state updates
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add state/
+          git diff --staged --quiet || git commit -m "Update snapshot"
+          git push
